@@ -13,7 +13,12 @@ Mobile-first anime action RPG with classic action combat and R6/R15 character su
 - Skill cooldown validation and area/forward hit detection
 - Mobile Level, XP, and Gold HUD
 - Three selectable classes: Swordsman, Mage, and Archer
-- Starter weapon stat assignments: Eclipse Blade, Astral Staff, and Moon Bow
+- Starter weapon stat assignments and generated R6/R15 weapon visuals: Eclipse Blade, Astral Staff, and Moon Bow
+- Mage bolt and Archer arrow-style server ray attacks with visible traces
+- Starter inventory panel with server-validated class-locked equipment
+- Portal-based transition to a second prototype dungeon stage
+- Eclipse Guardian boss health bar
+- DataStore-backed Level, XP, and Gold saving with safe fallback
 - Three enemy archetypes: Eclipse Wisp, Void Stalker, and Abyss Brute
 - Eclipse Guardian dungeon boss with proximity pulse attack and respawn
 - Repeatable defeat quest: defeat five enemies for bonus XP and Gold
@@ -25,7 +30,8 @@ Mobile-first anime action RPG with classic action combat and R6/R15 character su
 The current training enemy is spawned automatically by `EnemySpawnService.server.lua`. It uses a simple floating orb placeholder model. Custom character models, animation, and dungeon visuals are planned later.
 
 ### Important limitations
-- Player data is currently session-only and resets when leaving.
+- Player progression uses DataStore `ProjectECLIPSE_PlayerData_v1`; saving requires the experience to be published and Studio API access enabled for Studio tests. If DataStore requests fail, the game falls back to session defaults and warns in Output.
+- Class choice and equipment are currently session-only; only Level, XP, and Gold are persisted.
 - This repository contains Roblox source files, not a published Roblox place.
 - Roblox Studio is required to sync, build, and test the game on a supported Windows or macOS computer.
 - The scripts have been committed but have not yet been runtime-tested in Roblox Studio.
@@ -44,4 +50,6 @@ The current training enemy is spawned automatically by `EnemySpawnService.server
 5. Dungeon map and mobile HUD polish
 6. Character skills and progression HUD
 7. Classes, starter weapon stats, enemy roster, boss, and repeatable quest foundation
-8. Testing and publishing
+8. Ranged class combat, starter inventory, weapon visuals, stage transition, boss HUD, and progression saving
+9. Custom character/monster rigs, polished weapon meshes, animations, and testing
+10. Publishing
