@@ -7,7 +7,7 @@ if not remotes then
     remotes.Name = "EclipseRemotes"
     remotes.Parent = ReplicatedStorage
 end
-for _, name in {"AttackRequest","CombatFeedback","SkillRequest","SkillFeedback","ClassRequest","QuestFeedback"} do
+for _, name in {"AttackRequest","CombatFeedback","SkillRequest","SkillFeedback","ClassRequest","QuestFeedback","EquipRequest","InventoryFeedback","ClassAttackRequest","ClassAttackFeedback","StageFeedback"} do
     if not remotes:FindFirstChild(name) then
         local event = Instance.new("RemoteEvent")
         event.Name = name
