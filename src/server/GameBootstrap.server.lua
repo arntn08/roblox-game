@@ -13,9 +13,18 @@ if not remotesFolder then
     remotesFolder.Parent = ReplicatedStorage
 end
 
-print(string.format(
-    "[%s] Server initialized — %s",
-    GameConfig.GameName,
-    GameConfig.Version
-))
-print("[ECLIPSE] Waiting for character and player services.")
+local function ensureRemote(name)
+    local remote = remotesFolder:FindFirstChild(name)
+    if not remote then
+        remote = Instance.new("RemoteEvent")
+        remote.Name = name
+        remote.Parent = remotesFolder
+    end
+    return remote
+end
+
+ensureRemote("AttackRequest")
+ensureRemote("CombatFeedback")
+
+print(string.format("[%s] Server initialized — %s", GameConfig.GameName, GameConfig.Version))
+print("[ECLIPSE] Combat remotes ready.")
