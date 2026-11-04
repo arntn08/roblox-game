@@ -1,5 +1,6 @@
 -- Session-only repeatable defeat quest. Called by combat and skill reward paths.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 local QuestService = {}
 local progress = {}
 local TARGET = 5
@@ -31,4 +32,6 @@ end
 function QuestService.RemovePlayer(player)
     progress[player] = nil
 end
+
+Players.PlayerRemoving:Connect(QuestService.RemovePlayer)
 return QuestService
