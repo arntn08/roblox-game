@@ -10,6 +10,7 @@ Mobile-first anime action RPG with classic action combat and R6/R15 character su
 - Server-validated three-hit combo combat
 - Touch attack button and keyboard fallback
 - Training enemy spawn and basic chase/attack AI
+- Procedurally generated Eclipse Training Grounds arena, portal, pillars, lighting, and player spawn
 - XP and Gold rewards when an enemy is defeated
 
 ### Enemy setup
