@@ -12,6 +12,11 @@ Mobile-first anime action RPG with classic action combat and R6/R15 character su
 - Three server-validated character skills: Energy Slash, Eclipse Burst, and Shadow Nova
 - Skill cooldown validation and area/forward hit detection
 - Mobile Level, XP, and Gold HUD
+- Three selectable classes: Swordsman, Mage, and Archer
+- Starter weapon stat assignments: Eclipse Blade, Astral Staff, and Moon Bow
+- Three enemy archetypes: Eclipse Wisp, Void Stalker, and Abyss Brute
+- Eclipse Guardian dungeon boss with proximity pulse attack and respawn
+- Repeatable defeat quest: defeat five enemies for bonus XP and Gold
 - Training enemy spawn and basic chase/attack AI
 - Procedurally generated Eclipse Training Grounds arena, portal, pillars, lighting, and player spawn
 - XP and Gold rewards when an enemy is defeated
@@ -38,4 +43,5 @@ The current training enemy is spawned automatically by `EnemySpawnService.server
 4. Training enemy and AI
 5. Dungeon map and mobile HUD polish
 6. Character skills and progression HUD
-7. Testing and publishing
+7. Classes, starter weapon stats, enemy roster, boss, and repeatable quest foundation
+8. Testing and publishing
