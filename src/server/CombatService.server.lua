@@ -8,6 +8,7 @@ local CollectionService = game:GetService("CollectionService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local GameConfig = require(Shared:WaitForChild("GameConfig"))
 local PlayerDataService = require(script.Parent:WaitForChild("PlayerDataService"))
+local QuestService = require(script.Parent:WaitForChild("QuestService"))
 local remotes = ReplicatedStorage:WaitForChild("EclipseRemotes")
 local attackRequest = remotes:WaitForChild("AttackRequest")
 local combatFeedback = remotes:WaitForChild("CombatFeedback")
@@ -85,6 +86,7 @@ attackRequest.OnServerEvent:Connect(function(player)
         local gold = enemyModel:GetAttribute("EclipseRewardGold") or 10
         PlayerDataService.AddXP(player, xp)
         PlayerDataService.AddGold(player, gold)
+        QuestService.RegisterDefeat(player)
         combatFeedback:FireClient(player, {kind = "Reward", xp = xp, gold = gold})
     end
 
