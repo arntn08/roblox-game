@@ -9,7 +9,7 @@ if not remotes then
     remotes.Parent = ReplicatedStorage
 end
 
-for _, name in {"AttackRequest", "CombatFeedback"} do
+for _, name in {"AttackRequest", "CombatFeedback", "SkillRequest", "SkillFeedback"} do
     if not remotes:FindFirstChild(name) then
         local event = Instance.new("RemoteEvent")
         event.Name = name
