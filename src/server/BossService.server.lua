@@ -1,9 +1,10 @@
--- Prototype dungeon boss: stationary crystal-core orb with large health and rewards.
+-- Prototype dungeon boss with a simple proximity attack and respawn.
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local folder = Workspace:WaitForChild("EclipseEnemies")
 local SPAWN = Vector3.new(0, 5, -42)
 local RESPAWN = 20
+
 local function spawnBoss()
     local model = Instance.new("Model")
     model.Name = "Eclipse Guardian"
@@ -33,13 +34,35 @@ local function spawnBoss()
     humanoid.Parent = model
     model.PrimaryPart = root
     model.Parent = folder
+
+    local alive = true
     humanoid.Died:Connect(function()
+        alive = false
         root.Color = Color3.fromRGB(70,70,85)
         task.delay(RESPAWN, function()
             if model.Parent then model:Destroy() end
             spawnBoss()
         end)
     end)
+
+    -- Boss pulse attack: damages nearby players; defense reduces incoming damage.
+    task.spawn(function()
+        while alive and model.Parent do
+            task.wait(2.5)
+            if not alive or not model.Parent then break end
+            for _, player in Players:GetPlayers() do
+                local character = player.Character
+                local targetHumanoid = character and character:FindFirstChildOfClass("Humanoid")
+                local targetRoot = character and character:FindFirstChild("HumanoidRootPart")
+                if targetHumanoid and targetRoot and targetHumanoid.Health > 0
+                    and (targetRoot.Position - root.Position).Magnitude <= 18 then
+                    local defense = player:GetAttribute("EclipseDefense") or 0
+                    targetHumanoid:TakeDamage(math.max(1, 28 - defense))
+                end
+            end
+        end
+    end)
 end
+
 spawnBoss()
-print("[ECLIPSE] Eclipse Guardian boss spawned.")
+print("[ECLIPSE] Eclipse Guardian boss encounter online.")
