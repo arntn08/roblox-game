@@ -16,6 +16,11 @@ local skillRequest = remotes:WaitForChild("SkillRequest")
 local skillFeedback = remotes:WaitForChild("SkillFeedback")
 local classRequest = remotes:WaitForChild("ClassRequest")
 local questFeedback = remotes:WaitForChild("QuestFeedback")
+local equipRequest = remotes:WaitForChild("EquipRequest")
+local inventoryFeedback = remotes:WaitForChild("InventoryFeedback")
+local classAttackRequest = remotes:WaitForChild("ClassAttackRequest")
+local classAttackFeedback = remotes:WaitForChild("ClassAttackFeedback")
+local stageFeedback = remotes:WaitForChild("StageFeedback")
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "EclipseCombatUI"
@@ -90,7 +95,12 @@ attackButton.Text = "ATTACK"
 attackButton.Parent = gui
 styleButton(attackButton, Color3.fromRGB(16, 65, 105), 3)
 attackButton.Activated:Connect(function()
-    attackRequest:FireServer()
+    local class = player:GetAttribute("EclipseClass")
+    if class == "Mage" or class == "Archer" then
+        classAttackRequest:FireServer()
+    else
+        attackRequest:FireServer()
+    end
 end)
 
 local skillButtons = {}
@@ -140,7 +150,8 @@ end
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed then return end
     if input.KeyCode == Enum.KeyCode.F then
-        attackRequest:FireServer()
+        local class = player:GetAttribute("EclipseClass")
+        if class == "Mage" or class == "Archer" then classAttackRequest:FireServer() else attackRequest:FireServer() end
     elseif input.KeyCode == Enum.KeyCode.Z then
         useSkill("EnergySlash")
     elseif input.KeyCode == Enum.KeyCode.X then
@@ -218,4 +229,118 @@ questFeedback.OnClientEvent:Connect(function(data)
     end
 end)
 
-print("[ECLIPSE] Mobile HUD, class selection, quests, and skills ready.")
+
+-- Update the main action label when a ranged class is selected.
+local function refreshAttackLabel()
+    local class = player:GetAttribute("EclipseClass")
+    attackButton.Text = (class == "Mage" and "CAST") or (class == "Archer" and "SHOOT") or "ATTACK"
+end
+player:GetAttributeChangedSignal("EclipseClass"):Connect(refreshAttackLabel)
+refreshAttackLabel()
+
+-- Compact inventory panel. The server enforces class ownership and equipment rules.
+local inventoryToggle = Instance.new("TextButton")
+inventoryToggle.Name = "InventoryToggle"
+inventoryToggle.Size = UDim2.fromOffset(100, 34)
+inventoryToggle.Position = UDim2.new(1, -118, 0, 94)
+inventoryToggle.Text = "WEAPONS"
+inventoryToggle.Parent = gui
+styleButton(inventoryToggle, Color3.fromRGB(35,45,75), 2)
+
+local inventoryPanel = Instance.new("Frame")
+inventoryPanel.Name = "InventoryPanel"
+inventoryPanel.Size = UDim2.fromOffset(190, 150)
+inventoryPanel.Position = UDim2.new(1, -208, 0, 134)
+inventoryPanel.BackgroundColor3 = Color3.fromRGB(12,17,31)
+inventoryPanel.BackgroundTransparency = 0.08
+inventoryPanel.Visible = false
+inventoryPanel.Parent = gui
+local panelCorner = Instance.new("UICorner"); panelCorner.CornerRadius=UDim.new(0,10); panelCorner.Parent=inventoryPanel
+local panelTitle = Instance.new("TextLabel")
+panelTitle.Size=UDim2.new(1,0,0,28); panelTitle.BackgroundTransparency=1
+panelTitle.Text="STARTER WEAPONS"; panelTitle.TextColor3=Color3.fromRGB(130,210,255)
+panelTitle.Font=Enum.Font.GothamBold; panelTitle.TextSize=12; panelTitle.Parent=inventoryPanel
+
+for index, weaponName in {"Eclipse Blade","Astral Staff","Moon Bow"} do
+    local itemButton=Instance.new("TextButton")
+    itemButton.Size=UDim2.new(1,-16,0,32)
+    itemButton.Position=UDim2.fromOffset(8,30+(index-1)*37)
+    itemButton.Text=weaponName
+    itemButton.Parent=inventoryPanel
+    styleButton(itemButton,Color3.fromRGB(27,53,78),2)
+    itemButton.Activated:Connect(function()
+        equipRequest:FireServer(weaponName)
+    end)
+end
+inventoryToggle.Activated:Connect(function()
+    inventoryPanel.Visible=not inventoryPanel.Visible
+end)
+
+inventoryFeedback.OnClientEvent:Connect(function(data)
+    if typeof(data)~="table" then return end
+    if data.kind=="Equipped" then
+        feedback.Text="EQUIPPED: "..data.weapon
+        refreshAttackLabel()
+    elseif data.kind=="Rejected" then
+        feedback.Text=data.message or "CANNOT EQUIP"
+    end
+end)
+
+classAttackFeedback.OnClientEvent:Connect(function(data)
+    if typeof(data)~="table" then return end
+    if data.kind=="Attack" then
+        feedback.Text=data.hit and (data.class.." HIT  "..data.damage) or (data.class.." SHOT MISSED")
+    elseif data.kind=="Reward" then
+        feedback.Text="+"..data.xp.." XP  +"..data.gold.." GOLD"
+    end
+end)
+
+stageFeedback.OnClientEvent:Connect(function(data)
+    if typeof(data)=="table" and data.kind=="Entered" then
+        feedback.Text="DUNGEON STAGE "..data.stage..": "..data.name
+    end
+end)
+
+-- Boss health bar appears when an Eclipse boss enters the world.
+local bossGui
+local function watchBoss(model)
+    if not model:IsA("Model") or model:GetAttribute("EclipseBoss")~=true then return end
+    local bossHumanoid=model:FindFirstChildOfClass("Humanoid") or model:WaitForChild("Humanoid",5)
+    if not bossHumanoid then return end
+    if bossGui then bossGui:Destroy() end
+    bossGui=Instance.new("Frame")
+    bossGui.Name="BossHealthFrame"
+    bossGui.Size=UDim2.new(0.52,0,0,48)
+    bossGui.Position=UDim2.new(0.24,0,0,18)
+    bossGui.BackgroundColor3=Color3.fromRGB(15,12,28)
+    bossGui.Parent=gui
+    local title=Instance.new("TextLabel")
+    title.Size=UDim2.new(1,0,0,20); title.BackgroundTransparency=1
+    title.Text="ECLIPSE GUARDIAN"; title.TextColor3=Color3.fromRGB(220,185,255)
+    title.Font=Enum.Font.GothamBlack; title.TextSize=13; title.Parent=bossGui
+    local back=Instance.new("Frame")
+    back.Size=UDim2.new(1,-12,0,14); back.Position=UDim2.fromOffset(6,26)
+    back.BackgroundColor3=Color3.fromRGB(65,30,65); back.Parent=bossGui
+    local fill=Instance.new("Frame")
+    fill.Size=UDim2.fromScale(1,1); fill.BackgroundColor3=Color3.fromRGB(170,65,235); fill.Parent=back
+    local function update()
+        local ratio=math.clamp(bossHumanoid.Health/math.max(1,bossHumanoid.MaxHealth),0,1)
+        fill.Size=UDim2.fromScale(ratio,1)
+        title.Text=string.format("ECLIPSE GUARDIAN  %d / %d",math.max(0,math.floor(bossHumanoid.Health)),bossHumanoid.MaxHealth)
+        if bossHumanoid.Health<=0 then title.Text="ECLIPSE GUARDIAN DEFEATED" end
+    end
+    bossHumanoid.HealthChanged:Connect(update)
+    update()
+    bossHumanoid.Died:Connect(function()
+        task.delay(4,function() if bossGui then bossGui:Destroy(); bossGui=nil end end)
+    end)
+end
+
+for _,descendant in workspace:GetDescendants() do
+    if descendant:IsA("Model") and descendant:GetAttribute("EclipseBoss")==true then task.spawn(watchBoss,descendant) end
+end
+workspace.DescendantAdded:Connect(function(descendant)
+    if descendant:IsA("Model") and descendant:GetAttribute("EclipseBoss")==true then task.spawn(watchBoss,descendant) end
+end)
+
+print("[ECLIPSE] RPG HUD, class combat, inventory, boss bar, and stages ready.")
