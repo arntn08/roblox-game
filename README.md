@@ -9,6 +9,9 @@ Mobile-first anime action RPG with classic action combat and R6/R15 character su
 - R6/R15 character initialization
 - Server-validated three-hit combo combat
 - Touch attack button and keyboard fallback
+- Three server-validated character skills: Energy Slash, Eclipse Burst, and Shadow Nova
+- Skill cooldown validation and area/forward hit detection
+- Mobile Level, XP, and Gold HUD
 - Training enemy spawn and basic chase/attack AI
 - Procedurally generated Eclipse Training Grounds arena, portal, pillars, lighting, and player spawn
 - XP and Gold rewards when an enemy is defeated
@@ -34,4 +37,5 @@ The current training enemy is spawned automatically by `EnemySpawnService.server
 3. Basic combat
 4. Training enemy and AI
 5. Dungeon map and mobile HUD polish
-6. Testing and publishing
+6. Character skills and progression HUD
+7. Testing and publishing
