@@ -1,13 +1,12 @@
 -- Project ECLIPSE Alpha 0.1
--- Touch-friendly combat button and keyboard fallback for Studio testing.
+-- Mobile-first attack button and combat feedback.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
-local Shared = ReplicatedStorage:WaitForChild("Shared")
-local GameConfig = require(Shared:WaitForChild("GameConfig"))
+local config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("GameConfig"))
 local remotes = ReplicatedStorage:WaitForChild("EclipseRemotes")
 local attackRequest = remotes:WaitForChild("AttackRequest")
 local combatFeedback = remotes:WaitForChild("CombatFeedback")
@@ -18,7 +17,6 @@ gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local title = Instance.new("TextLabel")
-title.Name = "GameTitle"
 title.Size = UDim2.fromOffset(230, 42)
 title.Position = UDim2.fromOffset(16, 16)
 title.BackgroundColor3 = Color3.fromRGB(12, 17, 31)
@@ -26,13 +24,12 @@ title.BackgroundTransparency = 0.15
 title.TextColor3 = Color3.fromRGB(105, 210, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 16
-title.Text = GameConfig.GameName .. " | " .. GameConfig.Version
+title.Text = config.GameName .. " | " .. config.Version
 title.Parent = gui
 
 local feedback = Instance.new("TextLabel")
-feedback.Name = "CombatFeedback"
-feedback.Size = UDim2.fromOffset(250, 38)
-feedback.Position = UDim2.new(0.5, -125, 0.68, 0)
+feedback.Size = UDim2.fromOffset(280, 42)
+feedback.Position = UDim2.new(0.5, -140, 0.68, 0)
 feedback.BackgroundTransparency = 1
 feedback.TextColor3 = Color3.fromRGB(255, 231, 150)
 feedback.Font = Enum.Font.GothamBold
@@ -55,7 +52,6 @@ attackButton.Parent = gui
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(1, 0)
 corner.Parent = attackButton
-
 local stroke = Instance.new("UIStroke")
 stroke.Color = Color3.fromRGB(54, 174, 255)
 stroke.Thickness = 3
@@ -64,26 +60,24 @@ stroke.Parent = attackButton
 local function attack()
     attackRequest:FireServer()
 end
-
 attackButton.Activated:Connect(attack)
 
 UserInputService.InputBegan:Connect(function(input, processed)
-    if not processed and input.KeyCode == Enum.KeyCode.F then
-        attack()
-    end
+    if not processed and input.KeyCode == Enum.KeyCode.F then attack() end
 end)
 
 combatFeedback.OnClientEvent:Connect(function(data)
     if typeof(data) ~= "table" then return end
     if data.kind == "Hit" then
         feedback.Text = string.format("COMBO %d | %d DAMAGE", data.combo, data.damage)
-        feedback.TextColor3 = data.defeated
-            and Color3.fromRGB(120, 255, 170)
-            or Color3.fromRGB(255, 231, 150)
+        feedback.TextColor3 = data.defeated and Color3.fromRGB(120,255,170) or Color3.fromRGB(255,231,150)
     elseif data.kind == "Swing" then
         feedback.Text = string.format("COMBO %d | MISS", data.combo)
-        feedback.TextColor3 = Color3.fromRGB(150, 205, 255)
+        feedback.TextColor3 = Color3.fromRGB(150,205,255)
+    elseif data.kind == "Reward" then
+        feedback.Text = string.format("+%d XP   +%d GOLD", data.xp, data.gold)
+        feedback.TextColor3 = Color3.fromRGB(120,255,170)
     end
 end)
 
-print("[ECLIPSE] Mobile combat UI initialized.")
+print("[ECLIPSE] Mobile combat controls ready.")
