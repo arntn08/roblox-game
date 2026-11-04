@@ -8,11 +8,14 @@ local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("GameConfig"))
 local skills = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SkillConfig"))
+local classConfig = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("ClassConfig"))
 local remotes = ReplicatedStorage:WaitForChild("EclipseRemotes")
 local attackRequest = remotes:WaitForChild("AttackRequest")
 local combatFeedback = remotes:WaitForChild("CombatFeedback")
 local skillRequest = remotes:WaitForChild("SkillRequest")
 local skillFeedback = remotes:WaitForChild("SkillFeedback")
+local classRequest = remotes:WaitForChild("ClassRequest")
+local questFeedback = remotes:WaitForChild("QuestFeedback")
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "EclipseCombatUI"
@@ -176,4 +179,43 @@ skillFeedback.OnClientEvent:Connect(function(data)
     end
 end)
 
-print("[ECLIPSE] Mobile HUD and three-skill controls ready.")
+
+-- Class selection buttons. The server validates class names and applies stats.
+local classTitle = makeLabel("ClassTitle", UDim2.fromOffset(190, 28), UDim2.new(1, -204, 0, 12),
+    Color3.fromRGB(190, 210, 255), "SELECT CLASS", 13)
+local classOrder = {"Swordsman", "Mage", "Archer"}
+for index, className in classOrder do
+    local classInfo = classConfig.Classes[className]
+    local button = Instance.new("TextButton")
+    button.Name = className .. "Select"
+    button.Size = UDim2.fromOffset(62, 42)
+    button.Position = UDim2.new(1, -204 + ((index - 1) * 66), 0, 44)
+    button.Text = classInfo.DisplayName
+    button.Parent = gui
+    styleButton(button, classInfo.Color, 2)
+    button.Activated:Connect(function()
+        classRequest:FireServer(className)
+    end)
+end
+
+local questLabel = makeLabel("QuestProgress", UDim2.fromOffset(250, 30), UDim2.fromOffset(14, 90),
+    Color3.fromRGB(155, 235, 190), "QUEST: DEFEAT 5 ENEMIES (0/5)", 12)
+
+classRequest.OnClientEvent:Connect(function(data)
+    if typeof(data) == "table" and data.kind == "Selected" then
+        classTitle.Text = data.class .. " | " .. data.weapon
+        feedback.Text = "CLASS EQUIPPED: " .. data.class
+    end
+end)
+
+questFeedback.OnClientEvent:Connect(function(data)
+    if typeof(data) ~= "table" then return end
+    if data.kind == "Completed" then
+        questLabel.Text = "QUEST COMPLETE! +" .. data.xp .. " XP  +" .. data.gold .. " GOLD"
+        feedback.Text = "QUEST CLEARED!"
+    else
+        questLabel.Text = "QUEST: DEFEAT 5 ENEMIES (" .. data.count .. "/" .. data.target .. ")"
+    end
+end)
+
+print("[ECLIPSE] Mobile HUD, class selection, quests, and skills ready.")
