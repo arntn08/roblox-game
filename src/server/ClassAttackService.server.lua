@@ -28,6 +28,16 @@ remote.OnServerEvent:Connect(function(player)
     params.FilterDescendantsInstances={character}
     local result=workspace:Raycast(origin,direction,params)
     local hit=false
+    local endPosition = result and result.Position or (origin + direction)
+    local tracer=Instance.new("Part")
+    tracer.Name=class.."AttackTrace"
+    tracer.Anchored=true; tracer.CanCollide=false; tracer.CanTouch=false; tracer.CanQuery=false
+    tracer.Material=Enum.Material.Neon
+    tracer.Color=class=="Mage" and Color3.fromRGB(190,105,255) or Color3.fromRGB(115,235,170)
+    tracer.Size=Vector3.new(class=="Mage" and 0.55 or 0.22,class=="Mage" and 0.55 or 0.22,(endPosition-origin).Magnitude)
+    tracer.CFrame=CFrame.lookAt((origin+endPosition)/2,endPosition)
+    tracer.Parent=workspace
+    game:GetService("Debris"):AddItem(tracer,0.12)
     if result then
         local current=result.Instance
         while current and current~=workspace do
