@@ -11,6 +11,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local GameConfig = require(Shared:WaitForChild("GameConfig"))
 local SkillConfig = require(Shared:WaitForChild("SkillConfig"))
 local PlayerDataService = require(script.Parent:WaitForChild("PlayerDataService"))
+local QuestService = require(script.Parent:WaitForChild("QuestService"))
 
 local remotes = ReplicatedStorage:WaitForChild("EclipseRemotes")
 local skillRequest = remotes:WaitForChild("SkillRequest")
@@ -64,6 +65,7 @@ local function rewardDefeat(player, enemy)
     local gold = enemy:GetAttribute("EclipseRewardGold") or 10
     PlayerDataService.AddXP(player, xp)
     PlayerDataService.AddGold(player, gold)
+        QuestService.RegisterDefeat(player)
     skillFeedback:FireClient(player, {kind = "Reward", xp = xp, gold = gold})
 end
 
