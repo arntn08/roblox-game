@@ -20,8 +20,9 @@ local function configureCharacter(player, character)
         data = PlayerDataService.InitializePlayer(player)
     end
 
-    humanoid.MaxHealth = data.MaxHealth
-    humanoid.Health = data.MaxHealth
+    local configuredHealth = player:GetAttribute("EclipseMaxHealth") or data.MaxHealth
+    humanoid.MaxHealth = configuredHealth
+    humanoid.Health = configuredHealth
 
     local rigType = humanoid.RigType.Name
     character:SetAttribute("EclipseRigType", rigType)
