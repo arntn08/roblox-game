@@ -1,5 +1,5 @@
 -- Project ECLIPSE Alpha 0.1
--- Server-side startup. Server is authoritative for gameplay.
+-- Server-side startup. Gameplay decisions remain server-authoritative.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -18,3 +18,4 @@ print(string.format(
     GameConfig.GameName,
     GameConfig.Version
 ))
+print("[ECLIPSE] Waiting for character and player services.")
